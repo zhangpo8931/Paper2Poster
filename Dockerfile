@@ -1,5 +1,5 @@
-#FROM nvidia/cuda:12.6.0-devel-ubuntu24.04
-FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/nvidia/cuda:12.6.0-base-ubuntu24.04
+FROM nvidia/cuda:12.6.0-devel-ubuntu24.04
+#FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/nvidia/cuda:12.6.0-base-ubuntu24.04
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
