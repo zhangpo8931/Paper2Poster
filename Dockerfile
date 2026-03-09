@@ -1,4 +1,5 @@
-FROM nvidia/cuda:12.6.0-devel-ubuntu24.04
+#FROM nvidia/cuda:12.6.0-devel-ubuntu24.04
+FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/nvidia/cuda:12.6.0-base-ubuntu24.04
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
@@ -39,6 +40,8 @@ WORKDIR /app
 
 # Copy local repository contents (includes latest fixes)
 COPY . .
+# 构建保持，增加一行
+RUN pip3 install --upgrade --no-cache-dir --break-system-packages setuptools
 
 # Install full Python dependencies
 RUN pip3 install --no-cache-dir --break-system-packages -r requirements.txt
