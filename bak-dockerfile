@@ -38,16 +38,13 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 # Set working directory
 WORKDIR /app
 
-COPY requirements.txt .
-
+# Copy local repository contents (includes latest fixes)
+COPY . .
 # 构建保持，增加一行
 RUN pip3 install --upgrade --no-cache-dir --break-system-packages setuptools
 
 # Install full Python dependencies
-RUN  pip install --no-cache-dir  --break-system-packages -r requirements.txt
-
-# Copy local repository contents (includes latest fixes)
-COPY . .
+RUN pip3 install --no-cache-dir --break-system-packages -r requirements.txt
 
 # Create data directory for mounting
 RUN mkdir -p /data

@@ -59,7 +59,7 @@ class OpenAICompatibleModel(BaseModelBackend):
         self.api_key = api_key or os.environ.get("OPENAI_COMPATIBILIY_API_KEY")
         self.url = url or os.environ.get("OPENAI_COMPATIBILIY_API_BASE_URL")
         super().__init__(
-            model_type, model_config_dict, api_key, url, token_counter
+            model_type, model_config_dict, self.api_key, self.url, token_counter
         )
         self._client = OpenAI(
             timeout=180,
