@@ -161,7 +161,7 @@ def render_textbox(text_arrangement, textbox_content, tmp_dir):
 
 def gen_poster_title_content(args, actor_config):
     total_input_token, total_output_token = 0, 0
-    raw_content = json.load(open(f'contents/<{args.model_name_t}_{args.model_name_v}>_{args.poster_name}_raw_content.json', 'r'))
+    raw_content = json.load(open(f'{args.output_dir}/{args.poster_name}_raw_content.json', 'r'))
     actor_agent_name = 'poster_title_agent'
 
     title_string = raw_content['meta']
@@ -218,8 +218,8 @@ def gen_bullet_point_content(args, actor_config, critic_config, agent_modify=Tru
     total_input_token_t = total_output_token_t = 0
     total_input_token_v = total_output_token_v = 0
 
-    raw_content = json.load(open(f'contents/<{args.model_name_t}_{args.model_name_v}>_{args.poster_name}_raw_content.json', 'r'))
-    with open(f'tree_splits/<{args.model_name_t}_{args.model_name_v}>_{args.poster_name}_tree_split_{args.index}.json', 'r') as f:
+    raw_content = json.load(open(f'{args.output_dir}/{args.poster_name}_raw_content.json', 'r'))
+    with open(f'{args.output_dir}/tree_splits/{args.poster_name}_tree_split_{args.index}.json', 'r') as f:
         tree_split_results = json.load(f)
 
     panels = tree_split_results['panels']
@@ -454,7 +454,7 @@ def gen_bullet_point_content(args, actor_config, critic_config, agent_modify=Tru
 
     json.dump(
         bullet_point_content,
-        open(f'contents/<{args.model_name_t}_{args.model_name_v}>_{args.poster_name}_bullet_point_content_{args.index}.json', 'w'),
+        open(f'{args.output_dir}/{args.poster_name}_bullet_point_content_{args.index}.json', 'w'),
         indent=2
     )
 
@@ -462,7 +462,7 @@ def gen_bullet_point_content(args, actor_config, critic_config, agent_modify=Tru
 
 def gen_poster_content(args, actor_config):
     total_input_token, total_output_token = 0, 0
-    raw_content = json.load(open(f'contents/{args.model_name}_{args.poster_name}_raw_content.json', 'r'))
+    raw_content = json.load(open(f'{args.output_dir}/{args.poster_name}_raw_content.json', 'r'))
     agent_name = 'poster_content_agent'
 
     with open(f"utils/prompt_templates/{agent_name}.yaml", "r") as f:
@@ -484,7 +484,7 @@ def gen_poster_content(args, actor_config):
         )
         return actor_agent
 
-    outline = json.load(open(f'outlines/{args.model_name}_{args.poster_name}_outline_{args.index}.json', 'r'))
+    outline = json.load(open(f'{args.output_dir}/outlines/{args.poster_name}_outline_{args.index}.json', 'r'))
     raw_outline = json.loads(json.dumps(outline))
     outline_estimate_num_chars(outline)
     outline = remove_hierarchy_and_id(outline)
@@ -508,7 +508,7 @@ def gen_poster_content(args, actor_config):
         MAX_ATTEMPT=5
     )
 
-    json.dump(poster_content, open(f'contents/{args.model_name}_{args.poster_name}_poster_content_{args.index}.json', 'w'), indent=2)
+    json.dump(poster_content, open(f'{args.output_dir}/{args.poster_name}_poster_content_{args.index}.json', 'w'), indent=2)
     return total_input_token, total_output_token
 
 if __name__ == '__main__':

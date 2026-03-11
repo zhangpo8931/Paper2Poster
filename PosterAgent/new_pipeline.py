@@ -56,8 +56,6 @@ if __name__ == '__main__':
 
     start_time = time.time()
 
-    os.makedirs(args.tmp_dir, exist_ok=True)
-
     detail_log = {}
 
     agent_config_t = get_agent_config(args.model_name_t)
@@ -67,6 +65,12 @@ if __name__ == '__main__':
         args.poster_name = poster_name
     else:
         poster_name = args.poster_name
+
+    args.output_dir = f"/data/output/{args.poster_name}"
+    os.makedirs(args.output_dir, exist_ok=True)
+    args.tmp_dir = f"{args.output_dir}/tmp"
+    os.makedirs(args.tmp_dir, exist_ok=True)
+    
     meta_json_path = args.poster_path.replace('paper.pdf', 'meta.json')
     if args.poster_width_inches is not None and args.poster_height_inches is not None:
         poster_width = args.poster_width_inches * units_per_inch
@@ -289,8 +293,7 @@ if __name__ == '__main__':
         'figure_arrangement_inches': figure_arrangement_inches,
         'text_arrangement_inches': text_arrangement_inches,
     }
-    os.makedirs('tree_splits', exist_ok=True)
-    with open(f'tree_splits/<{args.model_name_t}_{args.model_name_v}>_{args.poster_name}_tree_split_{args.index}.json', 'w') as f:
+    with open(f'{args.output_dir}/tree_splits/{args.poster_name}_tree_split_{args.index}.json', 'w') as f:
         json.dump(tree_split_results, f, indent=4)
 
     layout_time_taken = time.time() - outline_time
@@ -343,7 +346,7 @@ if __name__ == '__main__':
 
     content_time = time.time()
 
-    bullet_content = json.load(open(f'contents/<{args.model_name_t}_{args.model_name_v}>_{args.poster_name}_bullet_point_content_{args.index}.json', 'r'))
+    bullet_content = json.load(open(f'{args.output_dir}/{args.poster_name}_bullet_point_content_{args.index}.json', 'r'))
 
     detail_log['content_in_t'] = input_token_t
     detail_log['content_out_t'] = output_token_t
@@ -414,11 +417,11 @@ if __name__ == '__main__':
         raise RuntimeError(f'Error in generating PowerPoint: {err}')
 
     # Step 8: Create a folder in the output directory
-    output_dir = f'<{args.model_name_t}_{args.model_name_v}>_generated_posters/{args.poster_path.replace("paper.pdf", "")}'
-    os.makedirs(output_dir, exist_ok=True)
+    # output_dir = f'<{args.model_name_t}_{args.model_name_v}>_generated_posters/{args.poster_path.replace("paper.pdf", "")}'
+    # os.makedirs(output_dir, exist_ok=True)
 
     # Copy logos to output directory for reference
-    logos_dir = os.path.join(output_dir, 'logos')
+    logos_dir = os.path.join(args.output_dir, 'logos')
     if institution_logo_path or conference_logo_path:
         os.makedirs(logos_dir, exist_ok=True)
         if institution_logo_path and os.path.exists(institution_logo_path):
@@ -427,12 +430,12 @@ if __name__ == '__main__':
             shutil.copy2(conference_logo_path, os.path.join(logos_dir, 'conference_logo' + os.path.splitext(conference_logo_path)[1]))
 
     # Step 9: Move poster.pptx to the output directory
-    pptx_path = os.path.join(output_dir, f'{poster_name}.pptx')
+    pptx_path = os.path.join(args.output_dir, f'{poster_name}.pptx')
     shutil.move(f'{args.tmp_dir}/poster.pptx', pptx_path)
     print(f'Poster PowerPoint saved to {pptx_path}')
     # Step 10: Convert the PowerPoint to images
-    ppt_to_images(pptx_path, output_dir)
-    print(f'Poster images saved to {output_dir}')
+    ppt_to_images(pptx_path, args.output_dir)
+    print(f'Poster images saved to {args.output_dir}')
 
     end_time = time.time()
     time_taken = end_time - start_time
@@ -442,7 +445,7 @@ if __name__ == '__main__':
     detail_log['render_time'] = render_time_taken
 
     # log
-    log_file = os.path.join(output_dir, 'log.json')
+    log_file = os.path.join(args.output_dir, 'log.json')
     with open(log_file, 'w') as f:
         log_data = {
             'input_tokens_t': total_input_tokens_t,
@@ -455,7 +458,7 @@ if __name__ == '__main__':
         }
         json.dump(log_data, f, indent=4)
 
-    detail_log_file = os.path.join(output_dir, 'detail_log.json')
+    detail_log_file = os.path.join(args.output_dir, 'detail_log.json')
     with open(detail_log_file, 'w') as f:
         json.dump(detail_log, f, indent=4)
 

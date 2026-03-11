@@ -243,9 +243,9 @@ def validate_and_adjust_subsections(section_bbox, subsection_bboxes):
     return False, revised
 
 def filter_image_table(args, filter_config):
-    images = json.load(open(f'<{args.model_name_t}_{args.model_name_v}>_images_and_tables/{args.poster_name}_images.json', 'r'))
-    tables = json.load(open(f'<{args.model_name_t}_{args.model_name_v}>_images_and_tables/{args.poster_name}_tables.json', 'r'))
-    doc_json = json.load(open(f'contents/<{args.model_name_t}_{args.model_name_v}>_{args.poster_name}_raw_content.json', 'r'))
+    images = json.load(open(f'{args.output_dir}/{args.poster_name}_images.json', 'r'))
+    tables = json.load(open(f'{args.output_dir}/{args.poster_name}_tables.json', 'r'))
+    doc_json = json.load(open(f'{args.output_dir}/{args.poster_name}_raw_content.json', 'r'))
     agent_filter = 'image_table_filter_agent'
     with open(f"utils/prompt_templates/{agent_filter}.yaml", "r", encoding="utf-8") as f:
         config_filter = yaml.safe_load(f)
@@ -301,17 +301,17 @@ def filter_image_table(args, filter_config):
     response_json = get_json_from_response(response.msgs[0].content)
     table_information = response_json['table_information']
     image_information = response_json['image_information']
-    json.dump(image_information, open(f'<{args.model_name_t}_{args.model_name_v}>_images_and_tables/{args.poster_name}_images_filtered.json', 'w'), indent=4)
-    json.dump(table_information, open(f'<{args.model_name_t}_{args.model_name_v}>_images_and_tables/{args.poster_name}_tables_filtered.json', 'w'), indent=4)
+    json.dump(image_information, open(f'{args.output_dir}/{args.poster_name}_images_filtered.json', 'w'), indent=4)
+    json.dump(table_information, open(f'{args.output_dir}/{args.poster_name}_tables_filtered.json', 'w'), indent=4)
 
     return input_token, output_token
 
 def gen_outline_layout_v2(args, actor_config):
     total_input_token, total_output_token = 0, 0
     agent_name = 'poster_planner_new_v2'
-    doc_json = json.load(open(f'contents/<{args.model_name_t}_{args.model_name_v}>_{args.poster_name}_raw_content.json', 'r'))
-    filtered_table_information = json.load(open(f'<{args.model_name_t}_{args.model_name_v}>_images_and_tables/{args.poster_name}_tables_filtered.json', 'r'))
-    filtered_image_information = json.load(open(f'<{args.model_name_t}_{args.model_name_v}>_images_and_tables/{args.poster_name}_images_filtered.json', 'r'))
+    doc_json = json.load(open(f'{args.output_dir}/{args.poster_name}_raw_content.json', 'r'))
+    filtered_table_information = json.load(open(f'{args.output_dir}/{args.poster_name}_tables_filtered.json', 'r'))
+    filtered_image_information = json.load(open(f'{args.output_dir}/{args.poster_name}_images_filtered.json', 'r'))
 
     filtered_table_information_captions = {}
     filtered_image_information_captions = {}
@@ -434,7 +434,7 @@ def gen_outline_layout_v2(args, actor_config):
     return total_input_token, total_output_token, paper_panels, figure_arrangement
 
 def gen_outline_layout(args, actor_config, critic_config):
-    poster_log_path = f'log/{args.model_name}_{args.poster_name}_poster_{args.index}'
+    poster_log_path = f'{args.output_dir}/log/{args.poster_name}_poster_{args.index}'
     if not os.path.exists(poster_log_path):
         os.mkdir(poster_log_path)
     total_input_token, total_output_token = 0, 0
@@ -446,16 +446,16 @@ def gen_outline_layout(args, actor_config, critic_config):
         'gen_layout': []
     }
     jinja_env = Environment(undefined=StrictUndefined)
-    outline_file_path = f'outlines/{args.model_name}_{args.poster_name}_outline_{args.index}.json'
+    outline_file_path = f'{args.output_dir}/outlines/{args.poster_name}_outline_{args.index}.json'
     agent_name = 'poster_planner_new'
     agent_init_name = 'layout_agent_init'
     agent_new_section_name = 'layout_agent_new_section'
     h1_critic_name = 'critic_layout_hierarchy_1'
     h2_actor_name = 'actor_layout_hierarchy_2'
 
-    doc_json = json.load(open(f'contents/{args.model_name}_{args.poster_name}_raw_content.json', 'r'))
-    filtered_table_information = json.load(open(f'images_and_tables/{args.poster_name}_tables_filtered.json', 'r'))
-    filtered_image_information = json.load(open(f'images_and_tables/{args.poster_name}_images_filtered.json', 'r'))
+    doc_json = json.load(open(f'{args.output_dir}/{args.poster_name}_raw_content.json', 'r'))
+    filtered_table_information = json.load(open(f'{args.output_dir}/{args.poster_name}_tables_filtered.json', 'r'))
+    filtered_image_information = json.load(open(f'{args.output_dir}/{args.poster_name}_images_filtered.json', 'r'))
 
     with open(f"utils/prompt_templates/{agent_name}.yaml", "r", encoding="utf-8") as f:
         planner_config = yaml.safe_load(f)
@@ -626,21 +626,21 @@ def gen_outline_layout(args, actor_config, critic_config):
         total_input_token += layout_cumulative_input_token
         total_output_token += layout_cumulative_output_token
 
-        h1_path = f'tmp/poster_<{sections[-1]}>_hierarchy_1.pptx'
-        h2_path = f'tmp/poster_<{sections[-1]}>_hierarchy_2.pptx'
+        h1_path = f'{args.tmp_dir}/poster_<{sections[-1]}>_hierarchy_1.pptx'
+        h2_path = f'{args.tmp_dir}/poster_<{sections[-1]}>_hierarchy_2.pptx'
 
-        h1_filled_path = f'tmp/poster_<{sections[-1]}>_hierarchy_1_filled.pptx'
-        h2_filled_path = f'tmp/poster_<{sections[-1]}>_hierarchy_2_filled.pptx'
+        h1_filled_path = f'{args.tmp_dir}/poster_<{sections[-1]}>_hierarchy_1_filled.pptx'
+        h2_filled_path = f'{args.tmp_dir}/poster_<{sections[-1]}>_hierarchy_2_filled.pptx'
 
-        ppt_to_images(h1_path, 'tmp/layout_h1')
-        ppt_to_images(h2_path, 'tmp/layout_h2')
-        ppt_to_images(h1_filled_path, 'tmp/layout_h1_filled')
-        ppt_to_images(h2_filled_path, 'tmp/layout_h2_filled')
+        ppt_to_images(h1_path, f'{args.tmp_dir}/layout_h1')
+        ppt_to_images(h2_path, f'{args.tmp_dir}/layout_h2')
+        ppt_to_images(h1_filled_path, f'{args.tmp_dir}/layout_h1_filled')
+        ppt_to_images(h2_filled_path, f'{args.tmp_dir}/layout_h2_filled')
 
-        h1_img = Image.open('tmp/layout_h1/slide_0001.jpg')
-        h2_img = Image.open('tmp/layout_h2/slide_0001.jpg')
-        h1_filled_img = Image.open('tmp/layout_h1_filled/slide_0001.jpg')
-        h2_filled_img = Image.open('tmp/layout_h2_filled/slide_0001.jpg')
+        h1_img = Image.open(f'{args.tmp_dir}/layout_h1/slide_0001.jpg')
+        h2_img = Image.open(f'{args.tmp_dir}/layout_h2/slide_0001.jpg')
+        h1_filled_img = Image.open(f'{args.tmp_dir}/layout_h1_filled/slide_0001.jpg')
+        h2_filled_img = Image.open(f'{args.tmp_dir}/layout_h2_filled/slide_0001.jpg')
 
         h1_critic_msg = BaseMessage.make_user_message(
             role_name='User',
@@ -799,11 +799,11 @@ def gen_outline_layout(args, actor_config, critic_config):
     total_input_token += gen_layout_cumulative_input_token
     total_output_token += gen_layout_cumulative_output_token
 
-    h1_path = f'tmp/poster_<{sections[-1]}>_hierarchy_1.pptx'
-    h2_path = f'tmp/poster_<{sections[-1]}>_hierarchy_2.pptx'
+    h1_path = f'{args.tmp_dir}/poster_<{sections[-1]}>_hierarchy_1.pptx'
+    h2_path = f'{args.tmp_dir}/poster_<{sections[-1]}>_hierarchy_2.pptx'
 
-    h1_filled_path = f'tmp/poster_<{sections[-1]}>_hierarchy_1_filled.pptx'
-    h2_filled_path = f'tmp/poster_<{sections[-1]}>_hierarchy_2_filled.pptx'
+    h1_filled_path = f'{args.tmp_dir}/poster_<{sections[-1]}>_hierarchy_1_filled.pptx'
+    h2_filled_path = f'{args.tmp_dir}/poster_<{sections[-1]}>_hierarchy_2_filled.pptx'
 
     ppt_to_images(h1_path, f'{poster_log_path}/layout_h1')
     ppt_to_images(h2_path, f'{poster_log_path}/layout_h2')
@@ -824,7 +824,7 @@ def gen_outline_layout(args, actor_config, critic_config):
         'total_output_token': total_output_token,
     }
 
-    with open(f'checkpoints/{args.model_name}_{args.poster_name}_ckpt_{args.index}.pkl', 'wb') as f:
+    with open(f'{args.output_dir}/{args.poster_name}_ckpt_{args.index}.pkl', 'wb') as f:
         pkl.dump(ckpt, f)
 
     json.dump(
