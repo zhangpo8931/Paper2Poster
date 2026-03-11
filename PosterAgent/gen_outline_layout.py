@@ -316,15 +316,21 @@ def gen_outline_layout_v2(args, actor_config):
     filtered_table_information_captions = {}
     filtered_image_information_captions = {}
 
-    for k, v in filtered_table_information.items():
-        filtered_table_information_captions[k] = {
-            v['caption']
-        }
+    # for k, v in filtered_table_information.items():
+    #     filtered_table_information_captions[k] = {
+    #         v['caption']
+    #     }
 
-    for k, v in filtered_image_information.items():
-        filtered_image_information_captions[k] = {
-            v['caption']
-        }
+    # for k, v in filtered_image_information.items():
+    #     filtered_image_information_captions[k] = {
+    #         v['caption']
+    #     }
+
+    for i, v in enumerate(filtered_table_information):
+        filtered_table_information_captions[f"{i+1}"] = v["caption"]
+
+    for i, v in enumerate(filtered_image_information):
+        filtered_image_information_captions[f"{i+1}"] = v["caption"]
 
     with open(f"utils/prompt_templates/{agent_name}.yaml", "r", encoding="utf-8") as f:
         planner_config = yaml.safe_load(f)
@@ -378,6 +384,7 @@ def gen_outline_layout_v2(args, actor_config):
     assigned_tables = set()
     
     for section_name, figure in figure_arrangement.items():
+        print(f'Processing section {section_name} with figure {figure}...')
         if 'image' in figure:
             image_id = str(figure['image'])
             if image_id in assigned_images:
