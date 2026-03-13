@@ -133,7 +133,7 @@ def parse_raw(args, actor_config, version=1):
 def gen_image_and_table(args, conv_res):
     input_token, output_token = 0, 0
 
-    output_dir = args.output_dir
+    output_dir = Path(args.output_dir)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     doc_filename = args.poster_name
@@ -183,11 +183,11 @@ def gen_image_and_table(args, conv_res):
     for table in conv_res.document.tables:
         caption = table.caption_text(conv_res.document)
         if len(caption) > 0:
-            table_img_path = f'<{args.model_name_t}_{args.model_name_v}>_images_and_tables/{args.poster_name}/{args.poster_name}-table-{table_index}.png'
+            table_img_path = output_dir / f"{doc_filename}-table-{table_index}.png"
             table_img = PIL.Image.open(table_img_path)
             tables[str(table_index)] = {
                 'caption': caption,
-                'table_path': table_img_path,
+                'table_path': str(table_img_path),
                 'width': table_img.width,
                 'height': table_img.height,
                 'figure_size': table_img.width * table_img.height,
@@ -201,11 +201,11 @@ def gen_image_and_table(args, conv_res):
     for image in conv_res.document.pictures:
         caption = image.caption_text(conv_res.document)
         if len(caption) > 0:
-            image_img_path = f'{output_dir}/{args.poster_name}-picture-{image_index}.png'
+            image_img_path = output_dir/f'{args.poster_name}-picture-{image_index}.png'
             image_img = PIL.Image.open(image_img_path)
             images[str(image_index)] = {
                 'caption': caption,
-                'image_path': image_img_path,
+                'image_path': str(image_img_path),
                 'width': image_img.width,
                 'height': image_img.height,
                 'figure_size': image_img.width * image_img.height,
@@ -213,8 +213,8 @@ def gen_image_and_table(args, conv_res):
             }
         image_index += 1
 
-    json.dump(images, open(f'{output_dir}/{args.poster_name}_images.json', 'w'), indent=4)
-    json.dump(tables, open(f'{output_dir}/{args.poster_name}_tables.json', 'w'), indent=4)
+    json.dump(images, open(output_dir / f"{args.poster_name}_images.json", "w"), indent=4)
+    json.dump(tables, open(output_dir / f"{args.poster_name}_tables.json", "w"), indent=4)
 
     return input_token, output_token, images, tables
 
