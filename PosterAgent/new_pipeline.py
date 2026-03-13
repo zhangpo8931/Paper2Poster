@@ -293,7 +293,9 @@ if __name__ == '__main__':
         'figure_arrangement_inches': figure_arrangement_inches,
         'text_arrangement_inches': text_arrangement_inches,
     }
-    with open(f'{args.output_dir}/tree_splits/{args.poster_name}_tree_split_{args.index}.json', 'w') as f:
+    dir_path = f"{args.output_dir}/tree_splits"
+    os.makedirs(dir_path, exist_ok=True)
+    with open(f'{dir_path}/{args.poster_name}_tree_split_{args.index}.json', 'w') as f:
         json.dump(tree_split_results, f, indent=4)
 
     layout_time_taken = time.time() - outline_time
